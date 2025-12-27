@@ -1,6 +1,6 @@
-# Cafeshop Management System
+# BrewDesk - A Cafeshop Management System
 
-Welcome to the Cafeshop Management System! This system is designed to manage employee accounts, handle user authentication, and provide a graphical interface for cafe operations.
+Welcome to the BrewDesk, a simple cafeshop management system! This system is designed to manage employee accounts, handle user authentication, and provide a graphical interface for cafe operations.
 
 ## Table of Contents
 
@@ -42,7 +42,7 @@ Welcome to the Cafeshop Management System! This system is designed to manage emp
    git clone https://github.com/melita-pereira/Cafeshop.git
    ```
 
-2. Import the project into your preferred Java IDE (e.g., IntelliJ IDEA, Eclipse).
+2. Import the project into your preferred IDE (e.g., IntelliJ IDEA, VSCode).
 
 3. Create a MySQL database and set up the required tables.
 

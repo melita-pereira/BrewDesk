@@ -11,7 +11,7 @@ public class App extends Application {
     //Pulling up the login page
     @Override
     public void start(Stage stage) {
-        logger.info("Cafeshop App Started!");
+        logger.info("BrewDesk Started!");
         try {
             FormFactory.pullForm(FormFactory.FormType.HELLO_FORM, 610, 410);
         } catch (Exception e) {

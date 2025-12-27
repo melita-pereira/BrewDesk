@@ -36,6 +36,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static javafx.scene.control.Alert.AlertType.*;
 
 //main page where dashboard, inventory, menu and customer data reside
@@ -222,6 +225,7 @@ public class MainForm implements Initializable{
     private double amount;
     private double change;
     private AlertHandler alertHandler;
+    private static final Logger log = LoggerFactory.getLogger(MainForm.class);
 
     database db = database.getInstance();
     public MainForm(){
@@ -244,7 +248,8 @@ public class MainForm implements Initializable{
             }
             dashboard_NC.setText(String.valueOf(nc));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to load number of customers", e);
+            showAlert(ERROR, "Error Message", "Unable to load number of customers.");
         }
 
     }
@@ -271,7 +276,8 @@ public class MainForm implements Initializable{
             dashboard_TI.setText("$" + ti);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to load today's income", e);
+            showAlert(ERROR, "Error Message", "Unable to load today's income");
         }
     }
 
@@ -292,7 +298,8 @@ public class MainForm implements Initializable{
             dashboard_TotalI.setText("$" + ti);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to load total income");
+            showAlert(ERROR, "Error Message", "Unable to load total income.");
         }
     }
 
@@ -314,7 +321,8 @@ public class MainForm implements Initializable{
             dashboard_NSP.setText(String.valueOf(q));
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to load number of products", e);
+            showAlert(ERROR, "Error Message", "Unable to load number of products.");
         }
     }
 
@@ -989,7 +997,8 @@ public class MainForm implements Initializable{
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to fetch customer receipt data", e);
+            showAlert(ERROR, "Error Message", "Unable to load customer history.");
         }
         return listData;
     }
@@ -1067,7 +1076,8 @@ public class MainForm implements Initializable{
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to log out", e);
+            showAlert(ERROR, "Error Message", "Unable to log out.");
         }
 
     }
