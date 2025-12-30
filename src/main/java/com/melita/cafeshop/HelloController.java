@@ -22,6 +22,8 @@ import javafx.util.Duration;
 import static javafx.scene.control.Alert.AlertType.ERROR;
 import static javafx.scene.control.Alert.AlertType.INFORMATION;
 
+import com.melita.cafeshop.PasswordUtil;
+
 //manages the base page which is the login page, and handles register page, forgot password and set new password page
 public class HelloController implements Initializable{
 
@@ -120,6 +122,7 @@ public class HelloController implements Initializable{
 
         if (si_username.getText().isEmpty() || si_password.getText().isEmpty()) {
             showAlert(ERROR, "Error Message", "Please fill all blank fields!");
+            return;
         }
         String selectData = "SELECT password_hash, password_reset_required FROM users WHERE username = ?";
 
@@ -182,10 +185,9 @@ public class HelloController implements Initializable{
 
             try {
                 // CHECK IF THE USERNAME IS ALREADY RECORDED
-                String checkUsername = "SELECT username FROM users WHERE username = '"
-                        + su_username.getText() + "'";
-
+                String checkUsername = "SELECT username FROM users WHERE username = ?";
                 prepare = connect.prepareStatement(checkUsername);
+                prepare.setString(1, su_username.getText());
                 result = prepare.executeQuery();
 
                 if (result.next()) {
@@ -296,11 +298,13 @@ public class HelloController implements Initializable{
                         date = result.getString("date");
                     }
 
-                    String updatePass = "UPDATE users SET password = '"
-                    + np_newPassword.getText() + "', date = '" + date + "' WHERE username = '"
-                    + fp_username.getText() + "'";
+                    String updatePass = "UPDATE users SET password_hash = ?, password_reset_required = false, date = ? WHERE username = ?";
 
                     prepare = connect.prepareStatement(updatePass);
+                    String hashedPassword = PasswordUtil.hash(np_newPassword.getText());
+                    prepare.setString(1, hashedPassword);
+                    prepare.setString(2, date);
+                    prepare.setString(3, fp_username.getText());
                     prepare.executeUpdate();
 
                     showAlert(INFORMATION, "Information Message", "Password successfully changed!");
