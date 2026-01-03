@@ -138,6 +138,10 @@ public class HelloController implements Initializable{
             if (result.next()) {
                 String storedHash = result.getString("password_hash");
                 boolean resetRequired = result.getBoolean("password_reset_required");
+                if (storedHash == null){
+                    showAlert(INFORMATION, "Password Reset Required", "Please reset your password before logging in.");
+                    return;
+                }
                 if (PasswordUtil.verify(si_password.getText(), storedHash)) {
                     // TO GET THE USERNAME THAT USER USED
                     data.username = si_username.getText();
@@ -173,10 +177,13 @@ public class HelloController implements Initializable{
 
         if (su_username.getText().isEmpty() || su_password.getText().isEmpty() || su_confirmPass.getText().isEmpty() || su_email.getText().isEmpty()) {
             showAlert(ERROR, "Error Message", "Please fill all blank fields!");
+            return;
         } else if (!su_password.getText().equals(su_confirmPass.getText())) {
             showAlert(ERROR,"Error Message", "Passwords don't match! Please make sure to enter the same password for both!");
+            return;
         } else if (!su_email.getText().matches("^[-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+\\.[a-zA-Z]{2,4}")){
             showAlert(ERROR,"Error Message", "Please enter a valid email address!");
+            return;
         } else {
 
             String regData = "INSERT INTO users (username, email, password_hash, password_reset_required, date) "
@@ -246,6 +253,7 @@ public class HelloController implements Initializable{
 
         if (fp_email.getText().isEmpty() || fp_username.getText().isEmpty()) {
             showAlert(ERROR, "Error Message", "Please fill all blank fields!");
+            return;
 
         } else {
 
