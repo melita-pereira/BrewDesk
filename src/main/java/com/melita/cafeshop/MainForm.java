@@ -14,8 +14,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -24,7 +22,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.view.JasperViewer;
 
@@ -102,7 +99,7 @@ public class MainForm implements Initializable{
     private TextField inventory_productName;
 
     @FXML
-    private ComboBox<?> inventory_status;
+    private ComboBox<String> inventory_status;
 
     @FXML
     private TextField inventory_stock;
@@ -111,7 +108,7 @@ public class MainForm implements Initializable{
     private TableView<productData> inventory_tableView;
 
     @FXML
-    private ComboBox<?> inventory_type;
+    private ComboBox<String> inventory_type;
 
     @FXML
     private Button inventory_updateBtn;
@@ -198,10 +195,10 @@ public class MainForm implements Initializable{
     private Label dashboard_NSP;
 
     @FXML
-    private AreaChart<?, ?> dashboard_incomeChart;
+    private AreaChart<String, Number> dashboard_incomeChart;
 
     @FXML
-    private BarChart<?, ?> dashboard_CustomerChart;
+    private BarChart<String, Number> dashboard_CustomerChart;
 
     @FXML
     private Button displayOrder_btn;
@@ -324,7 +321,7 @@ public class MainForm implements Initializable{
 
         String sql = "SELECT date, SUM(total) FROM receipt GROUP BY date ORDER BY TIMESTAMP(date)";
         connect = db.getConnection();
-        XYChart.Series chart = new XYChart.Series();
+        XYChart.Series<String, Number> chart = new XYChart.Series<>();
         try {
             prepare = connect.prepareStatement(sql);
             result = prepare.executeQuery();
@@ -346,7 +343,7 @@ public class MainForm implements Initializable{
 
         String sql = "SELECT date, COUNT(id) FROM receipt GROUP BY date ORDER BY TIMESTAMP(date)";
         connect = db.getConnection();
-        XYChart.Series chart = new XYChart.Series();
+        XYChart.Series<String, Number> chart = new XYChart.Series<>();
         try {
             prepare = connect.prepareStatement(sql);
             result = prepare.executeQuery();
@@ -629,7 +626,7 @@ public class MainForm implements Initializable{
             typeL.add(data);
         }
 
-        ObservableList listData = FXCollections.observableArrayList(typeL);
+        ObservableList<String> listData = FXCollections.observableArrayList(typeL);
         inventory_type.setItems(listData);
     }
 
@@ -642,7 +639,7 @@ public class MainForm implements Initializable{
             statusL.add(data);
         }
 
-        ObservableList listData = FXCollections.observableArrayList(statusL);
+        ObservableList<String> listData = FXCollections.observableArrayList(statusL);
         inventory_status.setItems(listData);
 
     }
@@ -900,7 +897,7 @@ public class MainForm implements Initializable{
         if (totalP == 0 || menu_amount.getText().isEmpty()) {
             showAlert(ERROR, "Error Message", "Please order first!");
         } else {
-            HashMap map = new HashMap();
+            HashMap<String, Object> map = new HashMap<>();
             map.put("getReceipt", (cID - 1));
 
             try {
