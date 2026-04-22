@@ -5,6 +5,7 @@ module com.melita.cafeshop {
     requires mysql.connector.j;
     requires net.sf.jasperreports.core;
     requires transitive javafx.graphics;
+    requires org.slf4j;
 
 
     opens com.melita.cafeshop to javafx.fxml;

@@ -106,10 +106,13 @@ public class HelloController implements Initializable{
 
     private PreparedStatement prepare;
     private ResultSet result;
-    private Alert alert;
     private Connection connect;
+    private AlertHandler alertHandler;
 
     database db = database.getInstance();
+    public HelloController(){
+        this.alertHandler = new AlertHandler();
+    }
 
 
     //to facilitate logins
@@ -366,12 +369,12 @@ public class HelloController implements Initializable{
     }
 
     //alerts or pop-ups
-    private static void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    public void showAlert(Alert.AlertType alertType, String title, String message) {
+        alertHandler.showAlert(alertType, title, message);
+    }
+
+    public boolean showConfirmationDialog(String title, String message) {
+        return alertHandler.showConfirmationDialog(title, message);
     }
 
     @Override

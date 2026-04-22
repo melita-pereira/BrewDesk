@@ -48,13 +48,14 @@ public class CardProduct implements Initializable {
     private Connection connect;
     private PreparedStatement prepare;
     private ResultSet result;
-    private Alert alert;
     private int qty;
     private double totalP;
     private double pr;
 
     //Initializing db -- Singleton design pattern
     database db = database.getInstance();
+    public CardProduct(){
+    }
 
     //Definitions
     public void setData(productData prodData) {
@@ -188,13 +189,14 @@ public class CardProduct implements Initializable {
     }
 
     //alerts or pop-ups
-    private static void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    public void showAlert(Alert.AlertType alertType, String title, String message) {
+        AlertHandler.showAlert(alertType, title, message);
     }
+
+    public boolean showConfirmationDialog(String title, String message) {
+        return AlertHandler.showConfirmationDialog(title, message);
+    }
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
