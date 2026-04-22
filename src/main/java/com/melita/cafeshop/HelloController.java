@@ -370,11 +370,11 @@ public class HelloController implements Initializable{
 
     //alerts or pop-ups
     public void showAlert(Alert.AlertType alertType, String title, String message) {
-        alertHandler.showAlert(alertType, title, message);
+        AlertHandler.showAlert(alertType, title, message);
     }
 
     public boolean showConfirmationDialog(String title, String message) {
-        return alertHandler.showConfirmationDialog(title, message);
+        return AlertHandler.showConfirmationDialog(title, message);
     }
 
     @Override

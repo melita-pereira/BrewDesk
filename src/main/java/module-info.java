@@ -1,5 +1,5 @@
 module com.melita.cafeshop {
-    requires javafx.controls;
+    requires transitive javafx.controls;
     requires javafx.fxml;
     requires transitive java.sql;
     requires mysql.connector.j;
