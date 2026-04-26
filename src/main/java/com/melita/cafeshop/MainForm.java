@@ -2,6 +2,7 @@ package com.melita.cafeshop;
 
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.BarChart;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -14,8 +15,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -24,11 +23,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.view.JasperViewer;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -102,7 +101,7 @@ public class MainForm implements Initializable{
     private TextField inventory_productName;
 
     @FXML
-    private ComboBox<?> inventory_status;
+    private ComboBox<String> inventory_status;
 
     @FXML
     private TextField inventory_stock;
@@ -111,7 +110,7 @@ public class MainForm implements Initializable{
     private TableView<productData> inventory_tableView;
 
     @FXML
-    private ComboBox<?> inventory_type;
+    private ComboBox<String> inventory_type;
 
     @FXML
     private Button inventory_updateBtn;
@@ -198,10 +197,10 @@ public class MainForm implements Initializable{
     private Label dashboard_NSP;
 
     @FXML
-    private AreaChart<?, ?> dashboard_incomeChart;
+    private AreaChart<String, Number> dashboard_incomeChart;
 
     @FXML
-    private BarChart<?, ?> dashboard_CustomerChart;
+    private BarChart<String, Number> dashboard_CustomerChart;
 
     @FXML
     private Button displayOrder_btn;
@@ -324,7 +323,7 @@ public class MainForm implements Initializable{
 
         String sql = "SELECT date, SUM(total) FROM receipt GROUP BY date ORDER BY TIMESTAMP(date)";
         connect = db.getConnection();
-        XYChart.Series chart = new XYChart.Series();
+        XYChart.Series<String, Number> chart = new XYChart.Series<>();
         try {
             prepare = connect.prepareStatement(sql);
             result = prepare.executeQuery();
@@ -346,7 +345,7 @@ public class MainForm implements Initializable{
 
         String sql = "SELECT date, COUNT(id) FROM receipt GROUP BY date ORDER BY TIMESTAMP(date)";
         connect = db.getConnection();
-        XYChart.Series chart = new XYChart.Series();
+        XYChart.Series<String, Number> chart = new XYChart.Series<>();
         try {
             prepare = connect.prepareStatement(sql);
             result = prepare.executeQuery();
@@ -629,7 +628,7 @@ public class MainForm implements Initializable{
             typeL.add(data);
         }
 
-        ObservableList listData = FXCollections.observableArrayList(typeL);
+        ObservableList<String> listData = FXCollections.observableArrayList(typeL);
         inventory_type.setItems(listData);
     }
 
@@ -642,7 +641,7 @@ public class MainForm implements Initializable{
             statusL.add(data);
         }
 
-        ObservableList listData = FXCollections.observableArrayList(statusL);
+        ObservableList<String> listData = FXCollections.observableArrayList(statusL);
         inventory_status.setItems(listData);
 
     }
@@ -900,12 +899,14 @@ public class MainForm implements Initializable{
         if (totalP == 0 || menu_amount.getText().isEmpty()) {
             showAlert(ERROR, "Error Message", "Please order first!");
         } else {
-            HashMap map = new HashMap();
-            map.put("getReceipt", (cID - 1));
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("getReceipt", cID);
 
             try {
-
-                JasperDesign jDesign = JRXmlLoader.load("C:\\Users\\melit\\IdeaProjects\\Cafeshop\\src\\main\\resources\\com\\melita\\cafeshop\\report.jrxml");
+                InputStream reportStream = loadReportTemplate();
+                if (reportStream == null) return;   // abort if not found
+                JasperDesign jDesign = JRXmlLoader.load(reportStream);
+                
                 JasperReport jReport = JasperCompileManager.compileReport(jDesign);
                 JasperPrint jPrint = JasperFillManager.fillReport(jReport, map, connect);
 
@@ -913,7 +914,7 @@ public class MainForm implements Initializable{
 
                 menuRestart();
 
-            } catch (Exception e) {
+            } catch (JRException e) {
                 e.printStackTrace();
             }
 
@@ -1082,13 +1083,23 @@ public class MainForm implements Initializable{
 
     }
 
+    private InputStream loadReportTemplate() {
+      // Use the class‑loader of the current class (module‑aware)
+      InputStream stream = MainForm.class.getResourceAsStream("/com/melita/cafeshop/report.jrxml");
+      if (stream == null) {
+          showAlert(ERROR, "Error", "Report template not found on classpath.");
+      }
+       System.out.println(MainForm.class.getResource("/com/melita/cafeshop/report.jrxml"));
+      return stream;
+  }
+
     //alerts or pop-ups
     public void showAlert(Alert.AlertType alertType, String title, String message) {
-        alertHandler.showAlert(alertType, title, message);
+        AlertHandler.showAlert(alertType, title, message);
     }
 
     public boolean showConfirmationDialog(String title, String message) {
-        return alertHandler.showConfirmationDialog(title, message);
+        return AlertHandler.showConfirmationDialog(title, message);
     }
 
 
