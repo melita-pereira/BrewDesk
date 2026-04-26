@@ -22,6 +22,8 @@ import javafx.util.Duration;
 import static javafx.scene.control.Alert.AlertType.ERROR;
 import static javafx.scene.control.Alert.AlertType.INFORMATION;
 
+import com.melita.cafeshop.PasswordUtil;
+
 //manages the base page which is the login page, and handles register page, forgot password and set new password page
 public class HelloController implements Initializable{
 
@@ -120,22 +122,35 @@ public class HelloController implements Initializable{
 
         if (si_username.getText().isEmpty() || si_password.getText().isEmpty()) {
             showAlert(ERROR, "Error Message", "Please fill all blank fields!");
-        } else {
-            String selectData = "SELECT username, password FROM users WHERE username = ? and password = ?";
+            return;
+        }
+        String selectData = "SELECT password_hash, password_reset_required FROM users WHERE username = ?";
 
-            connect = db.getConnection();
+        connect = db.getConnection();
 
-            try {
+        try {
 
-                prepare = connect.prepareStatement(selectData);
-                prepare.setString(1, si_username.getText());
-                prepare.setString(2, si_password.getText());
+            prepare = connect.prepareStatement(selectData);
+            prepare.setString(1, si_username.getText());
 
-                result = prepare.executeQuery();
-                // IF SUCCESSFUL LOGIN, THEN PROCEED TO MAIN FORM
-                if (result.next()) {
+            result = prepare.executeQuery();
+            // IF SUCCESSFUL LOGIN, THEN PROCEED TO MAIN FORM
+            if (result.next()) {
+                String storedHash = result.getString("password_hash");
+                boolean resetRequired = result.getBoolean("password_reset_required");
+                if (storedHash == null){
+                    showAlert(INFORMATION, "Password Reset Required", "Please reset your password before logging in.");
+                    return;
+                }
+                if (PasswordUtil.verify(si_password.getText(), storedHash)) {
                     // TO GET THE USERNAME THAT USER USED
                     data.username = si_username.getText();
+
+                    if (resetRequired) {
+                        showAlert(INFORMATION, "Password Reset Required", "Please reset your password.");
+                        // redirect to reset screen later
+                        return;
+                    }
 
                     showAlert(INFORMATION,"Information Message", "Successfully logged in!");
 
@@ -143,15 +158,16 @@ public class HelloController implements Initializable{
                     FormFactory.pullForm(FormFactory.FormType.MAIN_FORM, 1100, 600);
 
                     si_loginBtn.getScene().getWindow().hide();
-
-                } else { // IF NOT, THEN THE ERROR MESSAGE WILL APPEAR
+                } else {
                     showAlert(ERROR,"Error Message", "Incorrect Username/Password");
                 }
 
-            } catch (Exception e) {
-                e.printStackTrace();
+            } else { // IF NOT, THEN THE ERROR MESSAGE WILL APPEAR
+                showAlert(ERROR,"Error Message", "Incorrect Username/Password");
             }
 
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
@@ -161,22 +177,24 @@ public class HelloController implements Initializable{
 
         if (su_username.getText().isEmpty() || su_password.getText().isEmpty() || su_confirmPass.getText().isEmpty() || su_email.getText().isEmpty()) {
             showAlert(ERROR, "Error Message", "Please fill all blank fields!");
+            return;
         } else if (!su_password.getText().equals(su_confirmPass.getText())) {
             showAlert(ERROR,"Error Message", "Passwords don't match! Please make sure to enter the same password for both!");
+            return;
         } else if (!su_email.getText().matches("^[-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+\\.[a-zA-Z]{2,4}")){
             showAlert(ERROR,"Error Message", "Please enter a valid email address!");
+            return;
         } else {
 
-            String regData = "INSERT INTO users (username, email, password, date) "
-                    + "VALUES(?,?,?,?)";
+            String regData = "INSERT INTO users (username, email, password_hash, password_reset_required, date) "
+                    + "VALUES(?,?,?,?,?)";
             connect = db.getConnection();
 
             try {
                 // CHECK IF THE USERNAME IS ALREADY RECORDED
-                String checkUsername = "SELECT username FROM users WHERE username = '"
-                        + su_username.getText() + "'";
-
+                String checkUsername = "SELECT username FROM users WHERE username = ?";
                 prepare = connect.prepareStatement(checkUsername);
+                prepare.setString(1, su_username.getText());
                 result = prepare.executeQuery();
 
                 if (result.next()) {
@@ -187,11 +205,13 @@ public class HelloController implements Initializable{
                     prepare = connect.prepareStatement(regData);
                     prepare.setString(1, su_username.getText());
                     prepare.setString(2, su_email.getText());
-                    prepare.setString(3, su_password.getText());
+                    String hashedPassword = PasswordUtil.hash(su_password.getText());
+                    prepare.setString(3, hashedPassword);
+                    prepare.setBoolean(4, false);
 
                     Date date = new Date();
                     java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-                    prepare.setString(4, String.valueOf(sqlDate));
+                    prepare.setString(5, String.valueOf(sqlDate));
                     prepare.executeUpdate();
 
                     showAlert(INFORMATION, "Information Message", "Account successfully registered!");
@@ -233,6 +253,7 @@ public class HelloController implements Initializable{
 
         if (fp_email.getText().isEmpty() || fp_username.getText().isEmpty()) {
             showAlert(ERROR, "Error Message", "Please fill all blank fields!");
+            return;
 
         } else {
 
@@ -285,11 +306,13 @@ public class HelloController implements Initializable{
                         date = result.getString("date");
                     }
 
-                    String updatePass = "UPDATE users SET password = '"
-                    + np_newPassword.getText() + "', date = '" + date + "' WHERE username = '"
-                    + fp_username.getText() + "'";
+                    String updatePass = "UPDATE users SET password_hash = ?, password_reset_required = false, date = ? WHERE username = ?";
 
                     prepare = connect.prepareStatement(updatePass);
+                    String hashedPassword = PasswordUtil.hash(np_newPassword.getText());
+                    prepare.setString(1, hashedPassword);
+                    prepare.setString(2, date);
+                    prepare.setString(3, fp_username.getText());
                     prepare.executeUpdate();
 
                     showAlert(INFORMATION, "Information Message", "Password successfully changed!");
