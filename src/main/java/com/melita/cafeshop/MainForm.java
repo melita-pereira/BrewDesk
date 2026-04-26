@@ -2,6 +2,7 @@ package com.melita.cafeshop;
 
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.BarChart;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -26,6 +27,7 @@ import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.view.JasperViewer;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -898,11 +900,13 @@ public class MainForm implements Initializable{
             showAlert(ERROR, "Error Message", "Please order first!");
         } else {
             HashMap<String, Object> map = new HashMap<>();
-            map.put("getReceipt", (cID - 1));
+            map.put("getReceipt", cID);
 
             try {
-
-                JasperDesign jDesign = JRXmlLoader.load("C:\\Users\\melit\\IdeaProjects\\Cafeshop\\src\\main\\resources\\com\\melita\\cafeshop\\report.jrxml");
+                InputStream reportStream = loadReportTemplate();
+                if (reportStream == null) return;   // abort if not found
+                JasperDesign jDesign = JRXmlLoader.load(reportStream);
+                
                 JasperReport jReport = JasperCompileManager.compileReport(jDesign);
                 JasperPrint jPrint = JasperFillManager.fillReport(jReport, map, connect);
 
@@ -910,7 +914,7 @@ public class MainForm implements Initializable{
 
                 menuRestart();
 
-            } catch (Exception e) {
+            } catch (JRException e) {
                 e.printStackTrace();
             }
 
@@ -1078,6 +1082,16 @@ public class MainForm implements Initializable{
         username.setText(user);
 
     }
+
+    private InputStream loadReportTemplate() {
+      // Use the class‑loader of the current class (module‑aware)
+      InputStream stream = MainForm.class.getResourceAsStream("/com/melita/cafeshop/report.jrxml");
+      if (stream == null) {
+          showAlert(ERROR, "Error", "Report template not found on classpath.");
+      }
+       System.out.println(MainForm.class.getResource("/com/melita/cafeshop/report.jrxml"));
+      return stream;
+  }
 
     //alerts or pop-ups
     public void showAlert(Alert.AlertType alertType, String title, String message) {

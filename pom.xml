@@ -58,7 +58,7 @@
     <!-- https://mvnrepository.com/artifact/net.sf.jasperreports/jasperreports -->
     <dependency>
       <groupId>net.sf.jasperreports</groupId>
-      <artifactId>jasperreports</artifactId>
+      <artifactId>jasperreports-jdt</artifactId>
       <version>7.0.6</version>
     </dependency>
 
@@ -95,7 +95,7 @@
             <!-- Default configuration for running with: mvn clean javafx:run -->
             <id>default-cli</id>
             <configuration>
-              <mainClass>com.melita.cafeshop/com.melita.cafeshop.HelloApplication</mainClass>
+              <mainClass>com.melita.cafeshop/com.melita.cafeshop.App</mainClass>
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>
